@@ -52,19 +52,20 @@ element_input_doc <- tags$div(
         "width:100%; resize:none; border:0; border-radius: 0; ",
         "font-family: var(--bs-font-monospace); padding: 8px 16px;"
       ),
-      rows="5", spellcheck="false", example_review)
+      rows="5", spellcheck="false", example_review
+    )
   ),
   tags$div(
-    class="card-footer p-0",
-    bslib::input_task_button(
-      id="input_doc_random", class="block bg-primary text-white",
-      label="Vorschlag generieren",
-      icon=icon_fa("fa-solid fa-dice"),
-      label_busy="Vorschlag generieren",
-      icon_busy=icon_fa("fa-solid fa-sync fa-spin"),
+    class="card-footer p-0 d-grid",
+    nd.util::nd_button_block(
+      .id="input_doc_random", 
+      .label="Vorschlag generieren",
+      .fa_class="fa-solid fa-dice",
+      .fa_class_busy="fa-solid fa-sync fa-spin",
       style=stri_c(
-        "width: 100%; padding: 8px 16px; border: 0; ",
-        "border-top-left-radius: 0; border-top-right-radius: 0; ",
+        "border: 0; ",
+        "border-top-left-radius: 0; ",
+        "border-top-right-radius: 0; ",
         "border-bottom-right-radius: var(--bs-border-radius); ",
         "border-bottom-left-radius: var(--bs-border-radius);"
       )
@@ -161,13 +162,12 @@ shiny_ui <- nd.util::nd_page(
       element_input_doc,
       element_input_options,
       tags$div(
-        class="my-4",
-        bslib::input_task_button(
-          id="input_doc_analyze", class="block bg-primary text-white",
-          label="Analysieren", icon=icon_fa("fa-solid fa-calculator"),
-          label_busy="Analysieren",
-          icon_busy=icon_fa("fa-solid fa-sync fa-spin"),
-          style="width: 100%; padding: 8px 16px;"
+        class="my-4 d-grid",
+        nd.util::nd_button_block(
+          .id="input_doc_analyze", 
+          .label="Analysieren", 
+          .fa_class="fa-solid fa-calculator",
+          .fa_class_busy="fa-solid fa-sync fa-spin"
         ),
         tags$script("$('#input_doc_analyze').click();")
       ),
