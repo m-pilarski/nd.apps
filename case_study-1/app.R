@@ -3,7 +3,7 @@ library(arrow)
 library(jsonlite)
 
 # Load the Parquet file
-file_path <- "../fixed_SMALL_google_news_sentiment.parquet" 
+file_path <- "fixed_SMALL_google_news_sentiment.parquet" 
 data <- read_parquet(file_path)
 
 # Define colors for entities
@@ -60,41 +60,52 @@ preprocess_data <- function(data) {
 data <- preprocess_data(data)
 
 # Shiny UI
-ui <- fluidPage(
-  
-    titlePanel("Analyse von Google News Artikeln"),
-    
+ui <- nd.util::nd_page(
+  .page_type="app",
+  .navbar=NULL,
+  .main=list(
     tags$div(
-      tags$h3("Wie wird ihr Unternehmen in den Medien wahrgenommen?"),
-      tags$p("Möchten Sie wissen, welches Bild Ihr Unternehmen in der Öffentlichkeit zeichnet? Mit einer gezielten Analyse von Nachrichtenberichten – sowohl lokal als auch überregional – gewinnen Sie wertvolle Einblicke in die mediale Wahrnehmung."),
-      tags$p("Durch die Auswertung relevanter Google News-Feeds zu spezifischen Suchbegriffen lassen sich gezielt Berichte identifizieren, die Ihr Unternehmen betreffen. Anhand moderner Text-Mining-Methoden können diese Artikel auf ihre Stimmung (Sentiment-Analyse) und die darin enthaltenen Schlüsselentitäten (Entitätenerkennung) untersucht werden."),
-      tags$p("Sehen Sie sich im folgenden Beispiel an, wie diese Analyse in der Praxis funktioniert!")
+      class="d-grid mb-4",
+      nd.util::nd_button_block(.id="generate", .label="Erhalte einen zufälligen Google News Artikel", .fa_class="fa-solid fa-dice", .fa_class_busy="fa-solid fa-dice fa-spin"),
     ),
-    
-    sidebarLayout(
-        sidebarPanel(
-            actionButton("generate", "Erhalte einen zufälligen Google News Artikel")
-        ),
-        mainPanel(
-            uiOutput("article_output")
-        )
+    uiOutput("article_output"),
+    tags$div(
+      tags$p("Unter ", tags$strong("„Sentiment“"), " sehen Sie, wie unsere automatisierte Analyse Nachrichtenartikel in positiv, neutral oder negativ klassifiziert. Die ", tags$strong("„Source“"), " gibt an, aus welcher Ursprungsquelle der Artikel stammt – direkt aus dem Google News-Feed für einen bestimmten Suchbegriff."),
+      tags$p("Zusätzlich hebt unsere automatisierte Analyse die wichtigsten Entitäten hervor:"),
+      tags$ul(
+        tags$li(tags$span(style = "background-color: lightblue; padding: 2px 6px;", "Blau"), " für Ortsnamen"),
+        tags$li(tags$span(style = "background-color: lightgreen; padding: 2px 6px;", "Grün"), " für Personennamen"),
+        tags$li(tags$span(style = "background-color: lightcoral; padding: 2px 6px;", "Rot"), " für Unternehmensnamen"),
+        tags$li(tags$span(style = "background-color: lightyellow; padding: 2px 6px;", "Gelb"), " für sonstige Eigennamen")
+      ),
+      tags$p("Ziehen Sie mehrere zufällige Nachrichtenartikel und erleben Sie, wie die automatisierte Sentiment- und Entitätsanalyse exemplarisch funktioniert."),
+      tags$p(tags$strong("Haben Sie noch Fragen oder wollen Sie an einer Fallstudie mitmachen? Kontaktieren Sie uns!"))
     ),
-                   tags$div(
-                                       tags$p("Unter ", tags$strong("„Sentiment“"), " sehen Sie, wie unsere automatisierte Analyse Nachrichtenartikel in positiv, neutral oder negativ klassifiziert. Die ", tags$strong("„Source“"), " gibt an, aus welcher Ursprungsquelle der Artikel stammt – direkt aus dem Google News-Feed für einen bestimmten Suchbegriff."),
-                                       tags$p("Zusätzlich hebt unsere automatisierte Analyse die wichtigsten Entitäten hervor:"),
-                                       tags$ul(
-                                         tags$li(tags$span(style = "background-color: lightblue; padding: 2px 6px;", "Blau"), " für Ortsnamen"),
-                                         tags$li(tags$span(style = "background-color: lightgreen; padding: 2px 6px;", "Grün"), " für Personennamen"),
-                                         tags$li(tags$span(style = "background-color: lightcoral; padding: 2px 6px;", "Rot"), " für Unternehmensnamen"),
-                                         tags$li(tags$span(style = "background-color: lightyellow; padding: 2px 6px;", "Gelb"), " für sonstige Eigennamen")
-                                       ),
-                                       tags$p("Ziehen Sie mehrere zufällige Nachrichtenartikel und erleben Sie, wie die automatisierte Sentiment- und Entitätsanalyse exemplarisch funktioniert."),
-                                       tags$p(tags$strong("Haben Sie noch Fragen oder wollen Sie an einer Fallstudie mitmachen? Kontaktieren Sie uns!"))
-                                     )
-          
-    )
+    htmltools::suppressDependencies("font-awesome")
+  )
+)
+  
 
-
+# ui <- nd.util::nd_page(
+#   .page_type="app",
+#   .navbar=NULL,
+#   .main=list(
+#     tags$div(
+#       class="my-4",
+#       bslib::input_task_button(
+#         id="generate", class="block bg-primary text-white",
+#         label="Erhalte einen zufälligen Google News Artikel", 
+#         icon=icon_fa("fa-solid fa-dice"),
+#         label_busy="Erhalte einen zufälligen Google News Artikel",
+#         icon_busy=icon_fa("fa-solid fa-dice fa-spin"),
+#         style="width: 100%; padding: 8px 16px;"
+#       ),
+#       tags$script("$('#generate').click();")
+#     ),
+#     uiOutput("article_output"),
+#     htmltools::suppressDependencies("font-awesome")
+#   )
+# )
 
 
 # Shiny Server
