@@ -1,13 +1,8 @@
 library(shiny)
 library(callr)
-# library(future)
-# library(promises)
-
-# plan(multisession)
 
 function(input, output, session) {
 
-  # TODO: find way to trigger event on app load
   .tok_senti_tbl_start <- vns::calc_tok_sentidict_tbl(
     .doc_str=example_review, .sentidict_tbl=vns.data::sentiws_tbl
   )
@@ -15,8 +10,6 @@ function(input, output, session) {
   .senti_dict_tbl_rct <- reactiveVal(vns.data::sentiws_tbl)
   .doc_str_rct <- reactiveVal(example_review)
   .tok_senti_tbl_rct <- reactiveVal(.tok_senti_tbl_start)
-
-
 
   observeEvent(input$input_senti_dict, {
 
@@ -56,14 +49,10 @@ function(input, output, session) {
 
     if(is.null(.tok_senti_tbl_rct())){return(NULL)}
     
-    # print(.doc_str_rct())
-    
     .tok_senti_tbl_rct() |>
       slice_min(doc_id, n=1, with_ties=TRUE) |>
       group_by(doc_id) |>
       summarize(doc_stat_ui = tok_pol_num |> (\(.tok_pol_num){
-
-        # print(.tok_pol_num)
 
         .doc_pol_num <- `/`(
           sum(.tok_pol_num, na.rm=TRUE),
@@ -72,8 +61,7 @@ function(input, output, session) {
             log(1 + sum(.tok_pol_num == 0, na.rm=TRUE))
           )
         )
-        # .doc_pol_num <- mean(.tok_pol_num)
-        
+
         .doc_pol_lab <- .doc_pol_num |>
           rlang::set_names() |>
           cut.default(
@@ -151,7 +139,6 @@ function(input, output, session) {
 
       })()) |>
       pluck("doc_stat_ui", 1) |>
-      (\(..x){print(..x); ..x})() |>
       as.character()
   })
 
