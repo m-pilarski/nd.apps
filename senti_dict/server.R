@@ -190,10 +190,6 @@ function(input, output, session) {
       ) |>
       purrr::transpose() |>
       purrr::map_chr(\(.tok_data){
-        # stringi::stri_c(
-        #   "<span class='", .tok_data$text_pol_lab, "'>&thinsp;",
-        #   .tok_data$text_str, "&thinsp;</span>"
-        # )
         stringi::stri_c(
           "<span class='", .tok_data$text_pol_lab, "' style='padding: 1pt 2pt;'>",
           .tok_data$text_str, "</span>"

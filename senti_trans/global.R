@@ -14,8 +14,6 @@ library(shiny)
 library(dplyr)
 library(purrr)
 library(stringi)
-# library(future.callr)
-# plan(callr)
 
 `%||%` <- rlang::`%||%`
 stri_c <- stringi::stri_c
@@ -30,11 +28,11 @@ example_review <- paste0(
 
 options(shiny.autoreload=TRUE)
 if(grepl("^hz126", Sys.info()["nodename"])){
-  shinyOptions(cache_pointer=cachem::cache_disk("cache/"))
+  shiny::shinyOptions(cache_pointer=cachem::cache_disk("cache/"))
 }else{
-  shinyOptions(cache_pointer=cachem::cache_mem())
+  shiny::shinyOptions(cache_pointer=cachem::cache_mem())
 }
-
+shiny::addResourcePath("assets", fs::path_package("nd.util", "www", "assets"))
 
 # spacy_model <- vns::load_spacy_model()
 

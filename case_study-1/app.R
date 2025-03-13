@@ -2,8 +2,10 @@ library(shiny)
 library(arrow)
 library(jsonlite)
 
+shiny::addResourcePath("assets", fs::path_package("nd.util", "www", "assets"))
+
 # Load the Parquet file
-file_path <- "fixed_SMALL_google_news_sentiment.parquet" 
+file_path <- "fixed_SMALL_google_news_sentiment.parquet"
 data <- read_parquet(file_path)
 
 # Define colors for entities
