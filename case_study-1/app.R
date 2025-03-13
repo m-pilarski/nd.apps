@@ -2,7 +2,7 @@ library(shiny)
 library(arrow)
 library(jsonlite)
 
-shiny::addResourcePath("assets", fs::path_package("nd.util", "www", "assets"))
+shiny::addResourcePath("assets", here::here("nd.assets", "assets"))
 
 # Load the Parquet file
 file_path <- "fixed_SMALL_google_news_sentiment.parquet"
