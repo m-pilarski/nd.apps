@@ -32,7 +32,7 @@ if(grepl("^hz126", Sys.info()["nodename"])){
 }else{
   shiny::shinyOptions(cache_pointer=cachem::cache_mem())
 }
-shiny::addResourcePath("assets", fs::path_package("nd.util", "www", "assets"))
+shiny::addResourcePath("assets", here::here("nd.assets", "assets"))
 
 # spacy_model <- vns::load_spacy_model()
 
