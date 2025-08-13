@@ -12,7 +12,12 @@ demo_texts <- c(
   "Tolles Design, aber der Lautsprecher rauscht nach 2 Wochen ständig 😕 https://lautsprecher.de/review",
   "Der Kundendienst hat mir super geholfen – da gibt man gerne 5 Sterne! 😊 https://lautsprecher.de/review",
   "Kaum ist die Garantie abgelaufen, geht das Gerät kaputt 👎 Jetzt warte ich seit über 3 Tagen auf eine Antwort vom Kundendienst http://techblog.de/review",
-  "Warum dauert die Lieferung so lange? 📦 Ich warte nun seit 2 Wochen... https://techblog.de/review"
+  "Warum dauert die Lieferung so lange? Ich warte nun seit 2 Wochen... 😫 https://techblog.de/review",
+  "Nach 5 Tagen war das Paket endlich da 📦 – schneller wäre natürlich besser gewesen! https://versand.de/review",
+  "In nur 2 Minuten aufgebaut und sofort einsatzbereit 🔧 – echt praktisch! https://produkt.de/review",
+  "Die Schuhe waren nach 2 Tagen eingetragen und sind seitdem super bequem! Fußschmerzen beim Joggen sind damit Geschichte 👟. https://schuhe.de/review",
+  "Mit 5 Klicks war die Bestellung abgeschlossen️ ✅ – super einfach! https://shop.de/review",
+  "Bereits nach 6 Stunden leer ⏳ – der Akku hält leider nicht, was er verspricht. https://technik.de/review"
 )
 
 
