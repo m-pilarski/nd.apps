@@ -5,6 +5,8 @@ library(SnowballC)
 library(udpipe)
 library(here)
 
+shiny::addResourcePath("assets", here::here("nd.assets", "assets"))
+
 
 ### demo texts (could add a few more)
 demo_texts <- c(
