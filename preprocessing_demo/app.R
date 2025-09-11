@@ -68,21 +68,6 @@ preprocess_text <- function(text, steps) {
   emojis        <- regmatches(text, gregexpr(emoji_pattern, text, perl = TRUE))[[1]]
   have_emojis   <- length(emojis) > 0
   
-  placeholders_url <- character(0)
-  if ("punct" %in% steps && !("url" %in% steps) && have_urls) {
-    placeholders_url <- sprintf("URLTOKEN%05d", seq_along(urls))  
-    tmp <- text
-    for (i in seq_along(urls)) tmp <- sub_fixed(urls[i], placeholders_url[i], tmp)
-    text <- tmp
-  }
-  
-  placeholders_emo <- character(0)
-  if ("punct" %in% steps && !("emoji" %in% steps) && have_emojis) {
-    placeholders_emo <- sprintf("EMOTOKEN%05d", seq_along(emojis))
-    tmp <- text
-    for (i in seq_along(emojis)) tmp <- sub_fixed(emojis[i], placeholders_emo[i], tmp)
-    text <- tmp
-  }
   
   if ("url"     %in% steps) text <- gsub(url_pattern,   "", text, perl = TRUE)
   if ("lower"   %in% steps) text <- tolower(text)
@@ -95,7 +80,7 @@ preprocess_text <- function(text, steps) {
     if (!is.null(lem)) text <- lem
   }
   
-  if ("stopwords" %in% steps) text <- tm::removeWords(text, tm::stopwords("de"))
+  if ("stopwords" %in% steps) text <- tm::removeWords(text, vns.data::sword_vec)
   
   if ("stem" %in% steps) {
     toks <- strsplit(text, "\\s+")[[1]]
@@ -103,16 +88,101 @@ preprocess_text <- function(text, steps) {
     text <- paste(SnowballC::wordStem(toks, language = "german"), collapse = " ")
   }
   
-  if (length(placeholders_url) > 0) {
-    for (i in seq_along(placeholders_url)) text <- sub_fixed(placeholders_url[i], urls[i], text)
-  }
-  if (length(placeholders_emo) > 0) {
-    for (i in seq_along(placeholders_emo)) text <- sub_fixed(placeholders_emo[i], emojis[i], text)
+
+  
+remove_punct_outside <- function(text, url_pattern, emoji_pattern) {
+    matches <- gregexpr(paste0(url_pattern, "|", emoji_pattern), text, perl = TRUE)[[1]]
+    if (length(matches) == 1 && matches[1] == -1) {
+      return(gsub("[[:punct:]]", " ", text))
+    }
+    
+    spans <- cbind(start = matches,
+                   end   = matches + attr(matches, "match.length") - 1L)
+    
+    result <- character(0)
+    pos <- 1L
+    for (i in seq_len(nrow(spans))) {
+      s <- spans[i, "start"]; e <- spans[i, "end"]
+      if (pos <= s - 1L) {
+        result <- c(result, gsub("[[:punct:]]", " ", substr(text, pos, s - 1L)))
+      }
+      result <- c(result, substr(text, s, e))
+      pos <- e + 1L
+    }
+    if (pos <= nchar(text)) {
+      result <- c(result, gsub("[[:punct:]]", " ", substr(text, pos, nchar(text))))
+    }
+    paste(result, collapse = "")
   }
   
+  
+  
+### Selection options
+STEPS <- c(
+  "Kleinschreibung"       = "lower",
+  "Satzzeichen entfernen" = "punct",
+  "Zahlen entfernen"      = "numbers",
+  "URLs entfernen"        = "url",
+  "Emojis entfernen"      = "emoji",
+  "Stopwörter entfernen"  = "stopwords",
+  "Lemmatisierung"        = "lemma",
+  "Stemming"              = "stem",
+  "Tokenisierung"         = "token"
+)
+
+
+### lemmatization model 
+UDPIPE_MODEL <- udpipe_load_model(
+   here::here("preprocessing_demo", "german-gsd-ud-2.5-191206.udpipe")
+  )
+
+lemmatize_text <- function(text) {
+  if (is.null(UDPIPE_MODEL)) return(NULL)   
+  ann <- udpipe::udpipe_annotate(UDPIPE_MODEL, x = text)
+  df  <- as.data.frame(ann)
+  lem <- df$lemma
+  lem <- lem[!is.na(lem) & nzchar(lem) & df$upos != "PUNCT"]
+  if (!length(lem)) return("")
+  paste(lem, collapse = " ") }
+}
+
+
+# helpers
+sub_fixed <- function(pattern, replacement, x) gsub(pattern, replacement, x, fixed = TRUE)
+
+preprocess_text <- function(text, steps) {
+  text <- if (is.null(text)) "" else text
+  
+  # Detect URLs & emojis once
+  url_pattern   <- "(https?://|www\\.)\\S+"
+  urls          <- regmatches(text, gregexpr(url_pattern, text, perl = TRUE))[[1]]
+  have_urls     <- length(urls) > 0
+  
+  emoji_pattern <- "[\\p{Extended_Pictographic}\\p{Emoji}\\p{Emoji_Presentation}\\p{Emoji_Component}\\x{FE0F}\\x{200D}]+"
+  emojis        <- regmatches(text, gregexpr(emoji_pattern, text, perl = TRUE))[[1]]
+  have_emojis   <- length(emojis) > 0
+
+  if ("url"     %in% steps) text <- gsub(url_pattern,   "", text, perl = TRUE)
+  if ("emoji"   %in% steps) text <- gsub(emoji_pattern, "", text, perl = TRUE)
+  if ("numbers" %in% steps) text <- gsub("[0-9]+",       " ", text)
+  if ("punct" %in% steps) {
+    text <- remove_punct_outside(
+      text,
+      url_pattern   = "(https?://|www\\.)\\S+",
+      emoji_pattern = "[\\p{Extended_Pictographic}\\p{Emoji}\\p{Emoji_Presentation}\\p{Emoji_Component}\\x{FE0F}\\x{200D}]+"
+    )
+  }
+  
+  if ("lower" %in% steps) text <- tolower(text)
+  
+  if ("lemma" %in% steps) { lem <- lemmatize_text(text); if (!is.null(lem)) text <- lem }
+  if ("stopwords" %in% steps) text <- tm::removeWords(text, vns.data::sword_vec)
+  if ("stem" %in% steps) {
+    toks <- strsplit(text, "\\s+")[[1]]; toks <- toks[toks != ""]
+    text <- paste(SnowballC::wordStem(toks, language = "german"), collapse = " ")
+  }
   if ("token" %in% steps) {
-    toks <- strsplit(text, "\\s+")[[1]]
-    toks <- toks[toks != ""]
+    toks <- strsplit(text, "\\s+")[[1]]; toks <- toks[toks != ""]
     text <- paste0("[", paste(toks, collapse = "], ["), "]")
   }
   
@@ -233,3 +303,4 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
+
