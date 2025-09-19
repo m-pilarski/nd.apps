@@ -23,112 +23,20 @@ demo_texts <- c(
 )
 
 
-### Selection options
+
 STEPS <- c(
   "Kleinschreibung"       = "lower",
   "Satzzeichen entfernen" = "punct",
   "Zahlen entfernen"      = "numbers",
   "URLs entfernen"        = "url",
   "Emojis entfernen"      = "emoji",
-  "Stopwörter entfernen"  = "stopwords",
+  "Stoppwörter entfernen"  = "stopwords",
   "Lemmatisierung"        = "lemma",
   "Stemming"              = "stem",
   "Tokenisierung"         = "token"
 )
 
 
-### lemmatization model 
-UDPIPE_MODEL <- udpipe_load_model(
-   here::here("preprocessing_demo", "german-gsd-ud-2.5-191206.udpipe")
-  )
-
-lemmatize_text <- function(text) {
-  if (is.null(UDPIPE_MODEL)) return(NULL)   
-  ann <- udpipe::udpipe_annotate(UDPIPE_MODEL, x = text)
-  df  <- as.data.frame(ann)
-  lem <- df$lemma
-  lem <- lem[!is.na(lem) & nzchar(lem) & df$upos != "PUNCT"]
-  if (!length(lem)) return("")
-  paste(lem, collapse = " ")
-}
-
-
-# helpers
-sub_fixed <- function(pattern, replacement, x) gsub(pattern, replacement, x, fixed = TRUE)
-
-preprocess_text <- function(text, steps) {
-  text <- if (is.null(text)) "" else text
-  
-  # Detect URLs & emojis once
-  url_pattern   <- "(https?://|www\\.)\\S+"
-  urls          <- regmatches(text, gregexpr(url_pattern, text, perl = TRUE))[[1]]
-  have_urls     <- length(urls) > 0
-  
-  emoji_pattern <- "[\\p{Extended_Pictographic}\\p{Emoji}\\p{Emoji_Presentation}\\p{Emoji_Component}\\x{FE0F}\\x{200D}]+"
-  emojis        <- regmatches(text, gregexpr(emoji_pattern, text, perl = TRUE))[[1]]
-  have_emojis   <- length(emojis) > 0
-  
-  
-  if ("url"     %in% steps) text <- gsub(url_pattern,   "", text, perl = TRUE)
-  if ("lower"   %in% steps) text <- tolower(text)
-  if ("emoji"   %in% steps) text <- gsub(emoji_pattern, "", text, perl = TRUE)
-  if ("numbers" %in% steps) text <- gsub("[0-9]+",       " ", text)
-  if ("punct"   %in% steps) text <- gsub("[[:punct:]]",  " ", text)
-  
-  if ("lemma" %in% steps) {
-    lem <- lemmatize_text(text)
-    if (!is.null(lem)) text <- lem
-  }
-  
-  if ("stopwords" %in% steps) text <- tm::removeWords(text, vns.data::sword_vec)
-  
-  if ("stem" %in% steps) {
-    toks <- strsplit(text, "\\s+")[[1]]
-    toks <- toks[toks != ""]
-    text <- paste(SnowballC::wordStem(toks, language = "german"), collapse = " ")
-  }
-  
-
-  
-remove_punct_outside <- function(text, url_pattern, emoji_pattern) {
-    matches <- gregexpr(paste0(url_pattern, "|", emoji_pattern), text, perl = TRUE)[[1]]
-    if (length(matches) == 1 && matches[1] == -1) {
-      return(gsub("[[:punct:]]", " ", text))
-    }
-    
-    spans <- cbind(start = matches,
-                   end   = matches + attr(matches, "match.length") - 1L)
-    
-    result <- character(0)
-    pos <- 1L
-    for (i in seq_len(nrow(spans))) {
-      s <- spans[i, "start"]; e <- spans[i, "end"]
-      if (pos <= s - 1L) {
-        result <- c(result, gsub("[[:punct:]]", " ", substr(text, pos, s - 1L)))
-      }
-      result <- c(result, substr(text, s, e))
-      pos <- e + 1L
-    }
-    if (pos <= nchar(text)) {
-      result <- c(result, gsub("[[:punct:]]", " ", substr(text, pos, nchar(text))))
-    }
-    paste(result, collapse = "")
-  }
-  
-  
-  
-### Selection options
-STEPS <- c(
-  "Kleinschreibung"       = "lower",
-  "Satzzeichen entfernen" = "punct",
-  "Zahlen entfernen"      = "numbers",
-  "URLs entfernen"        = "url",
-  "Emojis entfernen"      = "emoji",
-  "Stopwörter entfernen"  = "stopwords",
-  "Lemmatisierung"        = "lemma",
-  "Stemming"              = "stem",
-  "Tokenisierung"         = "token"
-)
 
 
 ### lemmatization model 
@@ -144,7 +52,7 @@ lemmatize_text <- function(text) {
   lem <- lem[!is.na(lem) & nzchar(lem) & df$upos != "PUNCT"]
   if (!length(lem)) return("")
   paste(lem, collapse = " ") }
-}
+
 
 
 # helpers
