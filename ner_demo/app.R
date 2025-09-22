@@ -4,7 +4,7 @@ library(htmltools)
 
 shiny::addResourcePath("assets", here::here("nd.assets", "assets"))
 
-file_path <- "ner_demo/fixed_SMALL_google_news_sentiment.parquet"
+file_path <- "fixed_SMALL_google_news_sentiment.parquet"
 data <- read_parquet(file_path)
 
 # Colors for entities
