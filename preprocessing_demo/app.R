@@ -58,10 +58,35 @@ lemmatize_text <- function(text) {
 # helpers
 sub_fixed <- function(pattern, replacement, x) gsub(pattern, replacement, x, fixed = TRUE)
 
+remove_punct_outside <- function(text, url_pattern, emoji_pattern) {
+  matches <- gregexpr(paste0(url_pattern, "|", emoji_pattern), text, perl = TRUE)[[1]]
+  if (length(matches) == 1 && matches[1] == -1) {
+    return(gsub("[[:punct:]]", " ", text))
+  }
+  
+  spans <- cbind(start = matches,
+                 end   = matches + attr(matches, "match.length") - 1L)
+  
+  result <- character(0)
+  pos <- 1L
+  for (i in seq_len(nrow(spans))) {
+    s <- spans[i, "start"]; e <- spans[i, "end"]
+    if (pos <= s - 1L) {
+      result <- c(result, gsub("[[:punct:]]", " ", substr(text, pos, s - 1L)))
+    }
+    result <- c(result, substr(text, s, e))
+    pos <- e + 1L
+  }
+  if (pos <= nchar(text)) {
+    result <- c(result, gsub("[[:punct:]]", " ", substr(text, pos, nchar(text))))
+  }
+  paste(result, collapse = "")
+}
+
 preprocess_text <- function(text, steps) {
   text <- if (is.null(text)) "" else text
   
-  # Detect URLs & emojis once
+  # Detect URLs & emojis
   url_pattern   <- "(https?://|www\\.)\\S+"
   urls          <- regmatches(text, gregexpr(url_pattern, text, perl = TRUE))[[1]]
   have_urls     <- length(urls) > 0
@@ -97,6 +122,7 @@ preprocess_text <- function(text, steps) {
   text <- gsub("\\s+", " ", text)
   trimws(text)
 }
+
 
 
 # ui
